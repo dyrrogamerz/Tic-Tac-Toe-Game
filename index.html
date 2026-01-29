@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tic-Tac-Toe (O & X)</title>
+<style>
+  body, html {
+    margin: 0; padding: 0;
+    width: 100%; height: 100%;
+    display: flex; justify-content: center; align-items: center;
+    font-family: Arial, sans-serif;
+    background: #222;
+    color: #fff;
+    flex-direction: column;
+  }
+  h1 { margin-bottom: 10px; }
+  #board {
+    display: grid;
+    grid-template-columns: repeat(3, 100px);
+    grid-template-rows: repeat(3, 100px);
+    gap: 5px;
+    margin: 20px 0;
+  }
+  .cell {
+    background: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 60px;
+    cursor: pointer;
+    user-select: none;
+    border-radius: 10px;
+    transition: 0.2s;
+  }
+  .cell:hover {
+    background: #555;
+  }
+  #status { font-size: 20px; margin-bottom: 10px; }
+  #scoreboard { font-size: 18px; margin-bottom: 10px; }
+  #restartBtn {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    border-radius: 8px;
+    background: #ff0055;
+    color: white;
+  }
+  @media (max-width: 500px){
+    #board { grid-template-columns: repeat(3, 80px); grid-template-rows: repeat(3, 80px); }
+    .cell { font-size: 40px; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Tic-Tac-Toe</h1>
+<div id="scoreboard">X: 0 | O: 0 | Draws: 0</div>
+<div id="status">X's Turn</div>
+<div id="board"></div>
+<button id="restartBtn">Restart Game</button>
+
+<script>
+const board = document.getElementById('board');
+const status = document.getElementById('status');
+const scoreboard = document.getElementById('scoreboard');
+const restartBtn = document.getElementById('restartBtn');
+
+let currentPlayer = 'X';
+let gameState = ["", "", "", "", "", "", "", "", ""];
+let scores = { X: 0, O: 0, Draws: 0 };
+
+const winningCombinations = [
+  [0,1,2],[3,4,5],[6,7,8],
+  [0,3,6],[1,4,7],[2,5,8],
+  [0,4,8],[2,4,6]
+];
+
+// Initialize board
+function initBoard(){
+  board.innerHTML = '';
+  for(let i=0;i<9;i++){
+    const cell = document.createElement('div');
+    cell.classList.add('cell');
+    cell.dataset.index = i;
+    cell.addEventListener('click', handleCellClick);
+    board.appendChild(cell);
+  }
+  gameState = ["", "", "", "", "", "", "", "", ""];
+  currentPlayer = 'X';
+  status.textContent = `${currentPlayer}'s Turn`;
+}
+
+function handleCellClick(e){
+  const idx = e.target.dataset.index;
+  if(gameState[idx] !== "") return;
+
+  gameState[idx] = currentPlayer;
+  e.target.textContent = currentPlayer;
+
+  if(checkWin()){
+    status.textContent = `${currentPlayer} Wins! 🎉`;
+    scores[currentPlayer]++;
+    updateScoreboard();
+    disableBoard();
+    return;
+  }
+
+  if(gameState.every(cell => cell !== "")){
+    status.textContent = "Draw!";
+    scores.Draws++;
+    updateScoreboard();
+    return;
+  }
+
+  currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+  status.textContent = `${currentPlayer}'s Turn`;
+}
+
+function checkWin(){
+  return winningCombinations.some(combo => {
+    return combo.every(index => gameState[index] === currentPlayer);
+  });
+}
+
+function updateScoreboard(){
+  scoreboard.textContent = `X: ${scores.X} | O: ${scores.O} | Draws: ${scores.Draws}`;
+}
+
+function disableBoard(){
+  document.querySelectorAll('.cell').forEach(cell => cell.removeEventListener('click', handleCellClick));
+}
+
+restartBtn.addEventListener('click', initBoard);
+
+// Start the game
+initBoard();
+</script>
+
+</body>
+</html>
